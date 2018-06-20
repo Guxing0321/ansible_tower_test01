@@ -1,0 +1,28 @@
+---
+- hosts: additional
+  vars:
+    user: chenjun
+    password: "zhGuriCK5TrO4CgaDEer"
+    group: o2ogrp
+  remote_user: root
+  tasks:
+    - name: Make sure we have a {{ group }} group
+      group:
+        name: "{{ group}}"
+        state: present
+ 
+    - name: Allow {{ group }} group to have passwordless sudo
+      lineinfile:
+        dest: /etc/sudoers
+        state: present
+        regexp: '^%o2ogrp ALL='
+        line: '%o2ogrp ALL=(ALL) ALL'
+        #validate: '/usr/sbin/visudo -cf %s'
+    
+    - name: Add user "{{ user }}"
+      user: 
+        name: "{{ user }}"
+        password: "{{ password | password_hash('sha512') }}"
+        group: "{{ group }}"
+        state: present
+        update_password: on_create
